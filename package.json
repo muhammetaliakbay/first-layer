@@ -1,6 +1,6 @@
 {
   "name": "first-layer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "scripts": {
     "build": "tsc",
     "lint": "eslint ./src/ --ext .ts,.tsx",
@@ -12,7 +12,7 @@
     "lib/**/*.d.ts"
   ],
   "bin": {
-    "first-layer": "lib/server/main.ts"
+    "first-layer": "lib/server/main.js"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
