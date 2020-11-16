@@ -1,0 +1,38 @@
+{
+  "name": "first-layer",
+  "version": "0.0.0-0",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint ./src/ --ext .ts,.tsx",
+    "prepare": "tsc && npm test",
+    "test": "mocha --require source-map-support/register --require esm 'lib/**/*.spec.js'"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
+  "bin": {
+    "first-layer": "lib/server/main.ts"
+  },
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": "https://github.com/muhammetaliakbay/first-layer",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "ws": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.0.3",
+    "@types/node": "^14.14.7",
+    "@types/ws": "^7.4.0",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
+    "chai": "^4.2.0",
+    "eslint": "^7.12.1",
+    "esm": "^3.2.25",
+    "mocha": "^8.2.0",
+    "source-map-support": "^0.5.19",
+    "typescript": "^4.0.5"
+  }
+}
