@@ -2,8 +2,12 @@ import * as cluster from "cluster";
 import {ChannelMap} from "../channel-map";
 import {ChannelPublishListener} from "../channel";
 import {WorkerMessage} from "./message";
+import {cpus} from 'os';
 
-const workerCount = require('os').cpus().length;
+/*cluster.schedulingPolicy = cluster.SCHED_RR;
+cluster.setupMaster();*/
+
+const workerCount = cpus().length;
 
 interface WorkerMeta {
     worker: cluster.Worker;

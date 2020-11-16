@@ -2,7 +2,7 @@ import {WorkerMessage} from "./message";
 import {ChannelMap} from "../channel-map";
 import {ChannelPublishListener} from "../channel";
 import WebSocket from 'ws';
-import {IncomingMessage} from "http";
+import {createServer, IncomingMessage} from "http";
 import {
     decodeBufferPacket,
     decodeStringPacket,
@@ -10,6 +10,8 @@ import {
     Packet,
     PacketType
 } from "../packet";
+
+const id = process.env.id;
 
 const map = new ChannelMap();
 
@@ -55,11 +57,20 @@ process.on('message', (message: WorkerMessage) => {
 process.send('ready' as WorkerMessage);
 
 function listen() {
-    const server = new WebSocket.Server({
-        port: 80
+    const httpServer = createServer(
+        function(request, response) {
+            response.writeHead(200);
+            response.write(id);
+            response.end();
+        }
+    );
+
+    const wsServer = new WebSocket.Server({
+        server: httpServer
     });
 
-    server.on('connection', session);
+    wsServer.on('connection', session);
+    httpServer.listen(80);
 }
 
 function session(socket: WebSocket, request: IncomingMessage) {
