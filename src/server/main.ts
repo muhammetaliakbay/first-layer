@@ -1,9 +1,19 @@
 #!/usr/bin/node
 
-import * as cluster from "cluster";
+import {connect, node} from "./node";
+import {getParameters} from "./parameters";
 
-if (cluster.isMaster) {
-    import('./server-master');
-} else {
-    import('./server-worker');
+console.log('First Layer Node / ' + node.identity);
+
+function connectInitials() {
+    getParameters('--connect').forEach(
+        (url) => {
+            connect(url).catch(err => void 0);
+        }
+    );
 }
+connectInitials();
+setInterval(connectInitials, 10000);
+
+import './listeners';
+import './commander';
