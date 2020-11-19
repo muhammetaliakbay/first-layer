@@ -9,6 +9,8 @@ import {NodeIdentity} from "../identity";
 import {isMessage, Message, MessageType} from "../message";
 import {decodeBSONMessage, encodeBSONMessage} from "../message-util";
 
+export const WebSocketConstructor: typeof WebSocket = typeof WebSocket === 'undefined' ? require('ws') : WebSocket;
+
 export class WebsocketNodeConnection implements ForeignNodeConnection {
     private socketMessageListener = ({data}: MessageEvent) => {
         let bufferData: Buffer;
@@ -110,7 +112,15 @@ export class WebsocketNodeConnection implements ForeignNodeConnection {
         );
     }
 
-    static connect(node: LayerNode, socket: WebSocket, skipWaitingOpen: boolean = false, internal: boolean = false): Promise<WebsocketNodeConnection> {
+    static connect(node: LayerNode, socketOrURL: WebSocket | string, skipWaitingOpen: boolean = false, internal: boolean = false): Promise<WebsocketNodeConnection> {
+        let socket: WebSocket;
+
+        if (typeof socketOrURL === 'string') {
+            socket = new WebSocketConstructor(socketOrURL);
+        } else {
+            socket = socketOrURL;
+        }
+
         const socketReady = skipWaitingOpen ? Promise.resolve(socket) : new Promise<WebSocket>(
             (resolve, reject) => {
                 function openListener() {

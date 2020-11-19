@@ -1,7 +1,7 @@
 import {getParameters, hasFlag} from "./parameters";
 import WebSocket from 'ws';
 import {createServer} from "http";
-import {connect, node} from "./node";
+import {node} from "./node";
 import {WebsocketNodeConnection} from "../websocket/websocket-node-connection";
 import {addInternalDiscoverListener, setupInternalDiscovery} from "./discover-internal";
 
@@ -45,7 +45,7 @@ if (hasFlag('--cluster')) {
 
     addInternalDiscoverListener(
         (internalURL, identity) => {
-            connect(internalURL, identity, true).catch(err => void 0);
+            node.connect(internalURL, identity, true).catch(err => void 0);
         }
     );
 }

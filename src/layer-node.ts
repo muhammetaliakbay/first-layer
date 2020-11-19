@@ -3,6 +3,8 @@ import {NodeIdentity} from "./identity";
 import {SubjectMap, SubjectMapImpl} from "./subject-map";
 import {DataListener, WeightListener} from "./subject";
 import {SubjectAddress} from "./subject-address";
+import {WebsocketNodeConnection} from "./websocket/websocket-node-connection";
+import {node} from "./server/node";
 
 export interface LayerNode extends SubjectMap {
     identity: NodeIdentity;
@@ -10,6 +12,8 @@ export interface LayerNode extends SubjectMap {
     hasConnection(identifier: ForeignNodeConnection | NodeIdentity | string): boolean;
     addConnection(connection: ForeignNodeConnection): boolean;
     removeConnection(connection: ForeignNodeConnection | NodeIdentity): ForeignNodeConnection | undefined;
+
+    connect(url: string, identity?: NodeIdentity, internal?: boolean);
 }
 
 export function createLayerNode(): LayerNode {
@@ -121,6 +125,12 @@ class LayerNodeImpl extends SubjectMapImpl implements LayerNode {
                     );
                 }
 
+            } else if (message.type === MessageType.ConnectionInfoMessage) {
+
+                this.connect(message.url, message.identity).catch(
+                    err => void 0
+                );
+
             }
         };
 
@@ -196,5 +206,17 @@ class LayerNodeImpl extends SubjectMapImpl implements LayerNode {
         }
 
         return found;
+    }
+
+    async connect(url: string, identity?: NodeIdentity, internal?: boolean): Promise<ForeignNodeConnection> {
+        if (!node.hasConnection(url) && (identity == null || !node.hasConnection(identity))) {
+            if (url.startsWith('ws://') || url.startsWith('wss://')) {
+                return await WebsocketNodeConnection.connect(node, url, internal);
+            } else {
+                throw new Error('Unsupported url scheme to connect');
+            }
+        } else {
+            throw new Error('There is another connection already to the url');
+        }
     }
 }

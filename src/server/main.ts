@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-import {connect, node} from "./node";
+import {node} from "./node";
 import {getParameters} from "./parameters";
 
 console.log('First Layer Node / ' + node.identity);
@@ -8,7 +8,7 @@ console.log('First Layer Node / ' + node.identity);
 function connectInitials() {
     getParameters('--connect').forEach(
         (url) => {
-            connect(url).catch(err => void 0);
+            node.connect(url).catch(err => void 0);
         }
     );
 }
