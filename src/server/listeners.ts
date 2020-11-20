@@ -13,22 +13,30 @@ function session(socket: WebSocket) {
 
 const port = Number(getParameters('--port')[0] ?? 80);
 
-const server = createServer(
-    function(request, response) {
-        response.writeHead(200);
-        response.write(node.identity.bytes.toString('hex'));
-        response.end();
-    }
-);
+console.log('Port: ' + port);
 
-const wsServer = new WebSocket.Server({
-    server: server
-});
+if (port > -1) {
+    const server = createServer(
+        function(request, response) {
+            response.writeHead(200);
+            response.write(node.identity.bytes.toString('hex'));
+            response.end();
+        }
+    );
 
-wsServer.on('connection', session);
-server.listen(port);
+    const wsServer = new WebSocket.Server({
+        server: server
+    });
+
+    wsServer.on('connection', session);
+    server.listen(port);
+} else {
+    console.log('No Server');
+}
 
 if (hasFlag('--cluster')) {
+    console.log('--cluster');
+
     const internalServer = createServer();
     const internalWSServer = new WebSocket.Server({
         server: internalServer
@@ -40,11 +48,14 @@ if (hasFlag('--cluster')) {
         port: 0,
         exclusive: true
     }, () => {
-        setupInternalDiscovery('ws://127.0.0.1:' + (internalServer.address() as any).port, node.identity);
+        const privateURL = 'ws://127.0.0.1:' + (internalServer.address() as any).port;
+        console.log('Internal (Private) Server', privateURL);
+        setupInternalDiscovery(privateURL, node.identity);
     });
 
     addInternalDiscoverListener(
         (internalURL, identity) => {
+            // console.log('Found', internalURL, identity);
             node.connect(internalURL, identity, true).catch(err => void 0);
         }
     );

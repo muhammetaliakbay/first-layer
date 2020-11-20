@@ -1,11 +1,12 @@
 {
   "name": "first-layer",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "scripts": {
     "build": "tsc",
     "lint": "eslint ./src/ --ext .ts,.tsx",
     "prepare": "tsc && npm test",
-    "test": "mocha --require source-map-support/register --require esm 'lib/**/*.spec.js'"
+    "test": "mocha --require source-map-support/register --require esm 'lib/**/*.spec.js'",
+    "server": "node --require source-map-support/register lib/server/main.js"
   },
   "files": [
     "lib/**/*.js",

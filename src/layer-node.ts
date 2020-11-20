@@ -16,10 +16,6 @@ export interface LayerNode extends SubjectMap {
     connect(url: string, identity?: NodeIdentity, internal?: boolean);
 }
 
-export function createLayerNode(): LayerNode {
-    return new LayerNodeImpl();
-}
-
 export type MessageListener = (message: Message) => void;
 export type ConnectionStateListener = (state: ConnectionState) => void;
 
@@ -39,6 +35,14 @@ export interface ForeignNodeConnection {
     sendMessage(message: Message): void;
 }
 
+export interface Options {
+    discoverConnections?: boolean
+}
+
+export function createLayerNode(options?: Options): LayerNode {
+    return new LayerNodeImpl(options);
+}
+
 class LayerNodeImpl extends SubjectMapImpl implements LayerNode {
 
     readonly identity = NodeIdentity.createRandom();
@@ -46,9 +50,19 @@ class LayerNodeImpl extends SubjectMapImpl implements LayerNode {
     private connections: ForeignNodeConnection[] = [];
     private connectionCleanups: (() => void)[] = [];
 
+    readonly discoverConnections: boolean;
+
+    constructor(
+        options?: Options
+    ) {
+        super();
+
+        this.discoverConnections = options?.discoverConnections ?? true;
+    }
+
     private setupConnection(connection: ForeignNodeConnection) {
         for (const otherConnection of this.connections) {
-            if (!otherConnection.internal) {
+            if (!otherConnection.internal && otherConnection.url != null) {
                 connection.sendMessage({
                     type: MessageType.ConnectionInfoMessage,
                     identity: otherConnection.identity,
@@ -56,7 +70,7 @@ class LayerNodeImpl extends SubjectMapImpl implements LayerNode {
                 });
             }
 
-            if (!connection.internal) {
+            if (!connection.internal && connection.url != null) {
                 otherConnection.sendMessage({
                     type: MessageType.ConnectionInfoMessage,
                     identity: connection.identity,
@@ -127,9 +141,11 @@ class LayerNodeImpl extends SubjectMapImpl implements LayerNode {
 
             } else if (message.type === MessageType.ConnectionInfoMessage) {
 
-                this.connect(message.url, message.identity).catch(
-                    err => void 0
-                );
+                if (this.discoverConnections) {
+                    this.connect(message.url, message.identity).catch(
+                        err => void 0
+                    );
+                }
 
             }
         };
@@ -211,7 +227,7 @@ class LayerNodeImpl extends SubjectMapImpl implements LayerNode {
     async connect(url: string, identity?: NodeIdentity, internal?: boolean): Promise<ForeignNodeConnection> {
         if (!node.hasConnection(url) && (identity == null || !node.hasConnection(identity))) {
             if (url.startsWith('ws://') || url.startsWith('wss://')) {
-                return await WebsocketNodeConnection.connect(node, url, internal);
+                return await WebsocketNodeConnection.connect(node, url, false, internal);
             } else {
                 throw new Error('Unsupported url scheme to connect');
             }

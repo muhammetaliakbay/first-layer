@@ -58,6 +58,7 @@ rl.on('line', async line => {
 
 getParameters('--sub').forEach(
     async (text) => {
+        console.log('--sub', text);
         const params = parseJSONs(text);
         const address = params[0] instanceof Buffer ? new SubjectAddress(params[0]) : await SubjectAddress.resolve(params[0]);
         subscribe(address);

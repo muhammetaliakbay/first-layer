@@ -5,6 +5,10 @@ import {getParameters} from "./parameters";
 
 console.log('First Layer Node / ' + node.identity);
 
+getParameters('--connect').forEach( url => {
+    console.log('--connect', url);
+});
+
 function connectInitials() {
     getParameters('--connect').forEach(
         (url) => {
